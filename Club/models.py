@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.User
+from django.contrib.auth.models import User
 
 # Create your models here.
 #Meetings (meetingtitle, meetingdate, meeting time, location, agenda)
@@ -38,7 +38,7 @@ class Resource(models.Model):
     resourcetype=models.CharField(max_length=255)
     resourceURL=models.URLField(null=True, blank=True)
     resourcedate=models.DateField()
-    UserID=model.ForeignKey(User, on_delete=models.DO_NOTHING)
+    UserID=models.ForeignKey(User, on_delete=models.DO_NOTHING)
     resourcedesc=models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -53,7 +53,7 @@ class Event(models.Model):
     eventdate=models.DateField()
     eventtime=models.TimeField()
     eventlocation=models.CharField(max_length=255)
-    eventuser=mdoels.ManyToManyField(User)
+    eventuser=models.ManyToManyField(User)
     eventdesc=models.TextField(null=True, blank=True)
 
     def __str__(self):
