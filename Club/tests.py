@@ -1,8 +1,9 @@
 from django.test import TestCase
 from datetime import datetime, date, time
 from .models import MeetingMinutes, Meetings, Event, Resource
-from .views import index, getmeeting, getmeetingdetails, getresource
-from django.urls import reverse
+from .views import index, getmeeting, getmeetingdetails, getresource, newResource, newMeeting
+from .forms import MeetingsForm, ResourceForm
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.models import User
 
 # Create your tests here.
@@ -81,3 +82,37 @@ class GetMeetingDetailsTest(TestCase):
     def test_attendance_count(self):
         attendance=self.minutes.attendance.count()
         self.assertEqual(attendance, 3)
+
+#Form Tests
+class NewMeeting_Form_Test(TestCase):
+    def test_meetingsform_is_valid(self):
+        form=MeetingsForm(data={'meetingtitle': "Unit Tests for Police Apps", 'meetingdate': date(2021, 4, 24), 'meetingtime': time(17), 'meetinglocation': "Gordon\'s office", 'agenda': "Roll Call, Past problems, Guest Speaker, Adjourn"})
+        self.assertTrue(form.is_valid())
+    
+    def test_meetingsform_No_Agenda(self):
+        form=MeetingsForm(data={'meetingtitle': "Unit Tests for Police Apps", 'meetingdate': date(2021, 4, 24), 'meetingtime': time(17), 'meetinglocation': "Gordon\'s office"})
+        self.assertTrue(form.is_valid())
+
+    def test_meetingsform_empty(self):
+        form=MeetingsForm(data={'meetingtitle': ""})
+        self.assertFalse(form.is_valid())
+
+    def test_meetingsform_nodate(self):
+        form=MeetingsForm(data={'meetingtitle': "Unit Tests for Police Apps", 'meetingdate': ""})
+        self.assertFalse(form.is_valid())
+
+class NewMeeting_Authentication_Test(TestCase):
+    def setUp(self):
+        self.test_user=User.objects.create_user(username='testuserPOW', password='P@ssword!')
+        self.meeting=Meetings.objects.create(meetingtitle='Villains: Code 4 Chaos', meetingdate=date(2021, 6, 6), meetingtime=time(6,6), meetinglocation="Dive Bar", agenda="meh...")
+    
+    def test_redirect_if_not_logged_in(self):
+        response=self.client.get(reverse('newmeeting'))
+        self.assertRedirects(response, '/accounts/login/?next=/Club/newmeeting/')
+    
+    def test_logged_in_uses_correct_template(self):
+        login=self.client.login(username='testuserPOW', password='P@ssword!')
+        response=self.client.get(reverse('newmeeting'))
+        self.assertEqual(str(response.context['user']), 'testuserPOW')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'Club/newmeeting.html')
