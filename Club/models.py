@@ -11,6 +11,7 @@ class Meetings(models.Model):
     meetingtitle=models.CharField(max_length=255)
     meetingdate=models.DateField()
     meetingtime=models.TimeField()
+    
     meetinglocation=models.CharField(max_length=255)
     agenda=models.TextField(null=True, blank=True)
 
